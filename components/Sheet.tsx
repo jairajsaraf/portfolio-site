@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, type RefObject } from 'react';
 import { animate, useInView, useReducedMotion } from 'motion/react';
-import { links } from '@/lib/links';
 import { Num } from './Num';
 
 // Every axis cell has the same width, so percentage x positions line up
@@ -92,7 +91,7 @@ function Proj({ name, small, href }: { name: string; small: string; href?: strin
   );
 }
 
-export type RowId = 'rtdp' | 'sql' | 'attack';
+export type RowId = 'rtdp' | 'sql' | 'attack' | 'rentals';
 
 type RowProps = {
   id: RowId;
@@ -105,6 +104,36 @@ type RowProps = {
 /** One row of the results sheet. The landing page and the case studies both draw rows from here. */
 export function SheetRow({ id, first, link = true }: RowProps) {
   const cls = first ? 'row first' : 'row';
+  if (id === 'rentals') {
+    return (
+      <div className="row rentals">
+        <Proj name="Rentals data pipeline" small="Real public data (Zillow ZORI)" href={link ? '/rentals/' : undefined} />
+        <div className="twin">
+          <span className="lbl l1">Local Spark</span>
+          <span className="lbl l2">Databricks</span>
+          <svg className="twinsvg" height="44" aria-hidden="true" focusable="false">
+            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="11" y2="11" />
+            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="33" y2="33" />
+            <g className="bracket">
+              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="11" y2="11" />
+              <line data-bracket pathLength={1} x1="95%" x2="95%" y1="11" y2="33" />
+              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="33" y2="33" />
+            </g>
+          </svg>
+          <span className="val v1">
+            <Num>469,420</Num> rows
+          </span>
+          <span className="val v2">
+            <Num>469,420</Num> rows
+          </span>
+        </div>
+        <div className="say">
+          <b>Parity:</b> both runtimes give the same row counts on all four layers (<Num>8,340</Num> and{' '}
+          <Num>469,420</Num>), and every checksum matches.
+        </div>
+      </div>
+    );
+  }
   if (id === 'rtdp') {
     return (
       <div className={cls}>
@@ -197,12 +226,14 @@ function useDraw(ref: RefObject<HTMLElement | null>) {
 export function CaseSheet({ rows }: { rows: RowId[] }) {
   const ref = useRef<HTMLDivElement>(null);
   useDraw(ref);
+  const scaled = rows.some((id) => id !== 'rentals'); // the rentals row has no 0 / 0.5 / 1 axis
   return (
     <div className={`sheet slice${rows.length === 1 ? ' one' : ''}`} ref={ref}>
+      {rows.includes('rentals') && <p className="sr-only">Rentals: local Spark and Databricks both give 469,420 rows.</p>}
       {rows.map((id, i) => (
-        <SheetRow key={id} id={id} first={i === 0} link={false} />
+        <SheetRow key={id} id={id} first={i === 0 && id !== 'rentals'} link={false} />
       ))}
-      <Ticks />
+      {scaled && <Ticks />}
     </div>
   );
 }
@@ -224,32 +255,7 @@ export function Sheet() {
 
       <Ticks />
 
-      <div className="row rentals">
-        <Proj name="Rentals data pipeline" small="Real public data (Zillow ZORI)" href={links.rentals.code} />
-        <div className="twin">
-          <span className="lbl l1">Local Spark</span>
-          <span className="lbl l2">Databricks</span>
-          <svg className="twinsvg" height="44" aria-hidden="true" focusable="false">
-            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="11" y2="11" />
-            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="33" y2="33" />
-            <g className="bracket">
-              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="11" y2="11" />
-              <line data-bracket pathLength={1} x1="95%" x2="95%" y1="11" y2="33" />
-              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="33" y2="33" />
-            </g>
-          </svg>
-          <span className="val v1">
-            <Num>469,420</Num> rows
-          </span>
-          <span className="val v2">
-            <Num>469,420</Num> rows
-          </span>
-        </div>
-        <div className="say">
-          <b>Parity:</b> both runtimes give the same row counts on all four layers (<Num>8,340</Num> and{' '}
-          <Num>469,420</Num>), and every checksum matches.
-        </div>
-      </div>
+      <SheetRow id="rentals" />
     </section>
   );
 }
