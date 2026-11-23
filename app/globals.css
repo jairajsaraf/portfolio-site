@@ -889,7 +889,7 @@ html:not(.js) .controls {
   border: 0;
 }
 
-/* ---------- /rentals/: the wedge (W4-A; W4-A2 cells share it) ---------- */
+/* ---------- /rentals/: the wedge (W4-A) ---------- */
 /* End frame by default (no JS); the start state needs JS and not "still", and reduced motion keeps the end frame. */
 .wedge {
   display: grid;
