@@ -499,6 +499,7 @@ footer.site {
 }
 .p-edge.red { stroke: var(--red); }
 .p-edge.heavy { stroke-width: 2.4; }
+.p-edge.read { stroke-width: 3.4; }
 .f-top-plain { fill: var(--face-top); }
 .f-left-plain { fill: var(--face-left); }
 .f-right-plain { fill: var(--face-right); }
@@ -543,6 +544,9 @@ footer.site {
 .p-labels text.r,
 .dg text.r {
   fill: var(--red-text);
+}
+.p-labels text.m.ink {
+  fill: var(--ink);
 }
 /* In the column geometries the mono labels are 13 units, so they stay 11 px or more at 320 px. */
 .stage.narrow .p-labels text.m,
@@ -657,6 +661,45 @@ html:not(.js) .controls {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* "Ask the agent": the saved answers. Without JS both show in order; with JS only the asked one is rendered, so
+   the block is empty on load and grows on press (owner's choice, 2026-11-23). */
+.qa {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 64ch;
+}
+.qa-note {
+  margin: 0;
+  color: var(--muted);
+}
+.qa figure {
+  margin: 10px 0 0;
+}
+.js .qa figure:not(.on) {
+  display: none;
+}
+.qa figure p {
+  margin: 0;
+}
+.qa blockquote {
+  margin: 6px 0 0;
+  padding-left: 12px;
+  border-left: 1.5px solid var(--ink);
+  overflow-wrap: anywhere;
+}
+.qa blockquote ul {
+  margin: 2px 0 0;
+  padding-left: 18px;
+}
+.qa figcaption {
+  margin-top: 4px;
+  padding-left: 13.5px;
+  font: 400 12px var(--mono);
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 /* The stages sit under the picture, in columns that start under the stage each one describes. The column widths
