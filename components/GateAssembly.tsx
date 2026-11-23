@@ -240,7 +240,7 @@ export function GateAssembly({ children }: { children?: ReactNode }) {
         ))}
       </ol>
 
-      {/* The saved answers. With JS: both sit in one grid cell and only the asked one shows, so nothing below moves.
+      {/* The saved answers. With JS: only the asked one is rendered, so the block grows on press.
           Without JS: both show, in order. Not a live region: the live line above says where the answer is. */}
       <div className="qa">
         <p className="qa-note">

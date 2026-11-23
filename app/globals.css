@@ -663,8 +663,8 @@ html:not(.js) .controls {
   border: 0;
 }
 
-/* "Ask the agent": the saved answers. Without JS both show in order; with JS both share one grid cell and only
-   the asked one is visible, so the cell is as tall as the longer answer and nothing below moves. */
+/* "Ask the agent": the saved answers. Without JS both show in order; with JS only the asked one is rendered, so
+   the block is empty on load and grows on press (owner's choice, 2026-11-23). */
 .qa {
   margin-top: 14px;
   font-size: 13px;
@@ -678,15 +678,8 @@ html:not(.js) .controls {
 .qa figure {
   margin: 10px 0 0;
 }
-.js .qa-items {
-  display: grid;
-}
-.js .qa figure {
-  grid-area: 1 / 1;
-  visibility: hidden;
-}
-.js .qa figure.on {
-  visibility: visible;
+.js .qa figure:not(.on) {
+  display: none;
 }
 .qa figure p {
   margin: 0;
