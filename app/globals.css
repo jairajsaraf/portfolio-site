@@ -600,7 +600,8 @@ footer.site {
 .ptd[data-view='bypassed'] .dg-test {
   opacity: 1;
 }
-.ptd[data-view='bypassed'] .dg-guard .dg-node {
+.ptd[data-view='bypassed'] .dg-guard .dg-node,
+.ptd[data-view='bypassed'] .dg-guard path {
   fill: none;
   stroke-dasharray: 5 4;
 }

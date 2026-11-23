@@ -1,9 +1,9 @@
 'use client';
 
 // PropTalk, SQL mode, drawn as layers the query falls through: question, model, text guard, SQLite engine,
-// chart and table. Drawn in the site's own tokens (sheet ground, ink strokes, mono labels), following the
-// diagram-design rules: orthogonal lines only, labels off their strokes, lines drawn before boxes (a box hides the
-// part of a line that passes through it).
+// chart and table, in the site's own tokens (sheet ground, ink strokes, mono labels). From 1140 px up the layers are
+// slabs in the RTDP poster's projection (owner's pick, 2026-11-23); below, a flat column of boxes, where lines are
+// drawn before boxes (a box hides the part of a line that passes through it).
 //
 // Two views, one switch (W3-B, prompt 16):
 // - Guard on (the server-rendered and no-JS state): the eight attack cases of the first repetition, each ending
@@ -51,27 +51,6 @@ type Geo = {
 };
 
 const STOP = 8; // a stopped line ends this far above the box that stopped it
-
-const WIDE: Geo = {
-  id: 'ptw',
-  W: 1060,
-  H: 504,
-  x0: 24,
-  x1: 1036,
-  q: { y: 16, h: 44 },
-  m: { y: 104, h: 44 },
-  g: { y: 192, h: 64 },
-  e: { y: 300, h: 82 },
-  c: { y: 426, h: 62 },
-  A: 560,
-  atk: [600, 618, 636, 654, 672, 690, 708, 726],
-  test: { x: 654, from: 750, label: ['test suite, guard bypassed'] },
-  tick: 6,
-  lx: 760,
-  guard: ['SELECT only, keyword blocklist, table allowlist, row cap'],
-  engine: ['in-memory, authorizer allowlist, PRAGMA query_only,', '5-second time budget, 10,000-row cap'],
-  side: { x: 760, engine: [326, 344], chart: [452, 470] },
-};
 
 const NARROW: Geo = {
   id: 'ptn',
@@ -121,7 +100,7 @@ function Diagram({ g }: { g: Geo }) {
   const labelY = gapMid(m, gd) - (g.test.label.length - 1) * 8; // first baseline of the bypass label
   const testY = labelY - 4;
   return (
-    <svg className={`dg ${g.id === 'ptw' ? 'wide' : 'narrow'}`} viewBox={`0 0 ${g.W} ${g.H}`} role="img" aria-labelledby={`${g.id}-title ${g.id}-desc`}>
+    <svg className="dg narrow" viewBox={`0 0 ${g.W} ${g.H}`} role="img" aria-labelledby={`${g.id}-title ${g.id}-desc`}>
       <title id={`${g.id}-title`}>{TITLE}</title>
       <desc id={`${g.id}-desc`}>{DESC}</desc>
       <defs>
@@ -197,6 +176,149 @@ function Diagram({ g }: { g: Geo }) {
   );
 }
 
+// ---------- Wide layout: the five layers as slabs in the RTDP poster's projection ----------
+// A slab's top face is a rectangle on the ground plane: `a` units along the axis that runs up-right, `b` along the
+// one that runs down-right (screen slopes -1/3 and +1/3, the poster's SIN). Painted bottom slab first: each line
+// segment rises from a slab's top to the underside of the slab above, which is then painted over its upper end.
+const PL = { xL: 450, y0: 128, pitch: 96, a: 300, b: 80, T: 12, V: 40 };
+const PL_NAMES: [string, string[]][] = [
+  ['question', []],
+  ['model', []],
+  ['text guard', ['SELECT only, keyword blocklist,', 'table allowlist, row cap']],
+  ['SQLite engine', ['in-memory, authorizer allowlist,', 'PRAGMA query_only, 5-second', 'time budget, 10,000-row cap']],
+  ['chart and table', []],
+];
+const PL_ANSWER = 40; // u of the answered question's line
+const PL_ATK = [90, 112, 134, 156, 178, 200, 222, 244]; // u of the attack lines: refused, 4 at the guard, 3 executed
+const PL_END = [1, 2, 2, 2, 2, 4, 4, 4]; // the slab each attack line ends on
+const PL_TEST = 200;
+
+const plY = (k: number) => PL.y0 + k * PL.pitch; // the slab's left corner, top face
+const pt = (k: number, u: number): [number, number] => [PL.xL + u + PL.V, plY(k) - u / 3 + PL.V / 3];
+
+function Slab({ k, guard }: { k: number; guard?: boolean }) {
+  const { xL, a, b, T } = PL;
+  const y = plY(k);
+  const L: [number, number] = [xL, y];
+  const B: [number, number] = [xL + a, y - a / 3];
+  const R: [number, number] = [xL + a + b, y - a / 3 + b / 3];
+  const F: [number, number] = [xL + b, y + b / 3];
+  const p = (pts: [number, number][]) => `M${pts.map((q) => q.join(' ')).join('L')}Z`;
+  const down = (q: [number, number]): [number, number] => [q[0], q[1] + T];
+  return (
+    <g className={guard ? 'dg-guard' : undefined}>
+      <path className="p-edge f-left-plain" d={p([L, F, down(F), down(L)])} />
+      <path className="p-edge f-right-plain" d={p([F, R, down(R), down(F)])} />
+      <path className="p-edge f-top-plain" d={p([L, B, R, F])} />
+    </g>
+  );
+}
+
+function Plates() {
+  const clip = 'url(#ptw-reveal)';
+  const seg = (k: number, u: number) => {
+    const [x, top] = pt(k, u);
+    return `M${x} ${pt(k - 1, u)[1] + PL.T}V${top}`;
+  };
+  const tick = (k: number, u: number) => {
+    const [x, y] = pt(k, u);
+    return `M${x - 7} ${y + 2.3}L${x + 7} ${y - 2.3}`;
+  };
+  const [tx, tTop] = pt(3, PL_TEST);
+  const testY = plY(2) - 70;
+  const R = 856; // the right-hand notes
+  const H = plY(4) + PL.b / 3 + PL.T + 16;
+  const slabs = [4, 3, 2, 1, 0];
+  return (
+    <svg className="dg wide" viewBox={`0 0 1060 ${H}`} role="img" aria-labelledby="ptw-title ptw-desc">
+      <title id="ptw-title">{TITLE}</title>
+      <desc id="ptw-desc">{DESC}</desc>
+      <defs>
+        <marker id="ptw-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+          <path className="dg-arrow" d="M1 1L9 5L1 9" />
+        </marker>
+        <clipPath id="ptw-reveal" clipPathUnits="userSpaceOnUse">
+          <rect className="dg-reveal" x="0" y="0" width="1060" height={H} />
+        </clipPath>
+        <clipPath id="ptw-reveal-test" clipPathUnits="userSpaceOnUse">
+          <rect className="dg-reveal-test" x="0" y={testY - 16} width="1060" height={tTop - testY + 24} />
+        </clipPath>
+      </defs>
+
+      {slabs.map((k) => (
+        <g key={k}>
+          <Slab k={k} guard={k === 2} />
+          {k > 0 && (
+            <>
+              <path className="dg-link" d={seg(k, PL_ANSWER)} markerEnd="url(#ptw-arrow)" />
+              <g className="dg-eval" clipPath={clip}>
+                {PL_ATK.map((u, i) => (PL_END[i] >= k ? <path key={u} className="dg-attack" d={seg(k, u)} /> : null))}
+                {PL_ATK.map((u, i) => (PL_END[i] === k && k < 4 ? <path key={u} className="dg-stop" d={tick(k, u)} /> : null))}
+              </g>
+            </>
+          )}
+        </g>
+      ))}
+
+      {PL_NAMES.map(([name, lines], k) => (
+        <g key={name}>
+          <text x="24" y={plY(k) - 30}>
+            {name}
+          </text>
+          {lines.map((t, i) => (
+            <text key={t} className="m" x="24" y={plY(k) - 12 + i * 18}>
+              {t}
+            </text>
+          ))}
+        </g>
+      ))}
+
+      <g className="dg-eval" clipPath={clip}>
+        <text className="r" x={R} y={pt(1, PL_ATK[0])[1] + 4}>
+          refused by the model
+        </text>
+        <text className="r" x={R} y={pt(2, PL_ATK[2])[1] + 4}>
+          rejected by the guard
+        </text>
+      </g>
+      <text className="r dg-eval-note" x={R} y={plY(0) - 40}>
+        attack cases
+      </text>
+      <text className="m" x={R} y={plY(3) - 36}>
+        engine rules hold even
+      </text>
+      <text className="m" x={R} y={plY(3) - 18}>
+        with the guard bypassed
+      </text>
+      <g className="dg-eval-note">
+        <text className="m" x={R} y={plY(4) - 52}>
+          ran as plain SELECTs,
+        </text>
+        <text className="m" x={R} y={plY(4) - 34}>
+          no harm
+        </text>
+        <text className="m" x={R} y={plY(4) - 6}>
+          0 of 24 attack trials
+        </text>
+        <text className="m" x={R} y={plY(4) + 12}>
+          did harm
+        </text>
+      </g>
+
+      <g className="dg-test" clipPath="url(#ptw-reveal-test)">
+        <path className="dg-attack heavy" d={`M${R - 10} ${testY}H${tx}V${tTop}`} />
+        <path className="dg-stop" d={tick(3, PL_TEST)} />
+        <text className="m" x={R} y={testY + 4}>
+          test suite,
+        </text>
+        <text className="m" x={R} y={testY + 22}>
+          guard bypassed
+        </text>
+      </g>
+    </svg>
+  );
+}
+
 export function PropTalkDiagram() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.3 });
@@ -240,7 +362,7 @@ export function PropTalkDiagram() {
         {said}
       </p>
       <div className="dg-wrap wide">
-        <Diagram g={WIDE} />
+        <Plates />
       </div>
       <div className="dg-wrap narrow">
         <Diagram g={NARROW} />
