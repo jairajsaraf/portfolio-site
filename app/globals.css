@@ -888,3 +888,85 @@ html:not(.js) .controls {
   white-space: nowrap;
   border: 0;
 }
+
+/* ---------- /rentals/: the wedge (W4-A; W4-A2 cells share it) ---------- */
+/* End frame by default (no JS); the start state needs JS and not "still", and reduced motion keeps the end frame. */
+.wedge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  column-gap: 20px;
+  align-items: center;
+}
+.wg-tick,
+.wg-axis,
+.wg-cap {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.wg-plot {
+  position: relative;
+  height: 180px;
+  margin-top: 4px;
+  border: 1px solid var(--muted);
+}
+.wg-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.wg-filled { fill: var(--ink); }
+.wg-empty { fill: var(--grid); }
+.wg-gone { opacity: 0; }
+.wg-gap {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 13.5px;
+}
+.wg-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.wg-cap { margin-top: 2px; }
+.wg-arrow {
+  width: 52px;
+  height: 12px;
+  overflow: visible;
+}
+.wg-arrow path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.stages.r4 { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 24px; }
+.js:not(.still) .wedge .wg-gone { opacity: 1; }
+.js:not(.still) .wedge [data-fill] { clip-path: inset(0 100% 0 0); }
+.js:not(.still) .wedge [data-fade] { opacity: 0; }
+.js:not(.still) .wedge [data-arrow] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js:not(.still) .wedge .wg-gone { opacity: 0; }
+  .js:not(.still) .wedge [data-fill] { clip-path: none; }
+  .js:not(.still) .wedge [data-fade] { opacity: 1; }
+  .js:not(.still) .wedge [data-arrow] {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}
+@media (max-width: 1139px) {
+  .stages.r4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+}
+@media (max-width: 760px) {
+  .wedge {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+  }
+  .wg-arrow { justify-self: center; transform: rotate(90deg); }
+  .stages.r4 { grid-template-columns: 1fr; }
+}

@@ -21,5 +21,11 @@ export const links = {
     limitations: `${PROPTALK}#limitations`,
     commits: `${PROPTALK}/commits/master/`,
   },
-  rentals: { code: RENTALS },
+  rentals: {
+    code: RENTALS,
+    quickStart: `${RENTALS}#quick-start`,
+    results: `${RENTALS}#results`,
+    limitations: `${RENTALS}#limitations`,
+    commits: `${RENTALS}/commits/master/`,
+  },
 };

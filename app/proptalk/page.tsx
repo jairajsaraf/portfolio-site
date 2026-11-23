@@ -103,7 +103,7 @@ export default function PropTalk() {
         </Sec>
 
         <p className="next">
-          <a href="/rtdp/">Next: Real-time agentic data platform</a>
+          <a href="/rentals/">Next: Rentals data pipeline</a>
         </p>
       </main>
       <Footer />
