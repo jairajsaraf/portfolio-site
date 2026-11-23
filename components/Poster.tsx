@@ -9,16 +9,18 @@ type BoxProps = {
   lift?: number;
   tone?: 'plain' | 'red' | 'ink';
   heavy?: boolean;
+  /** The top slab while the read question plays: its edge thickens. */
+  read?: boolean;
 };
 
 /** A block drawn the way the camera sees it: diamond top, two side faces. */
-function IsoBox({ cx, cy, side, h, lift = 0, tone = 'plain', heavy }: BoxProps) {
+function IsoBox({ cx, cy, side, h, lift = 0, tone = 'plain', heavy, read }: BoxProps) {
   const w = half(side);
   const d = w * SIN;
   const H = h * COS;
   const yt = cy - lift * COS - H;
   const yb = yt + H;
-  const cls = `p-edge${tone === 'red' ? ' red' : ''}${heavy ? ' heavy' : ''}`;
+  const cls = `p-edge${tone === 'red' ? ' red' : ''}${heavy ? ' heavy' : ''}${read ? ' read' : ''}`;
   return (
     <g>
       <path className={`${cls} f-left-${tone}`} d={`M${cx - w} ${yt}L${cx} ${yt + d}V${yb + d}L${cx - w} ${yb}Z`} />
@@ -44,6 +46,7 @@ export function Poster({ geo, state, labelsOnly }: Props) {
   const { slabs, last } = state;
   const stopped = last === 'bad';
   const asking = last === 'ask';
+  const refusing = last === 'refuse';
   const { tracks: t, batch, slab, box, post, socket, gate } = geo;
   const sh = half(socket.side) * SIN;
   const sockPts: P[] = [
@@ -68,7 +71,7 @@ export function Poster({ geo, state, labelsOnly }: Props) {
       <IsoBox cx={gate.x} cy={gate.top} {...post} tone="ink" />
 
       {Array.from({ length: slabs }, (_, i) => (
-        <IsoBox key={i} cx={geo.stack[0]} cy={geo.stack[1]} side={slab.side} h={slab.h} lift={i * slab.pitch} heavy={i === slabs - 1} />
+        <IsoBox key={i} cx={geo.stack[0]} cy={geo.stack[1]} side={slab.side} h={slab.h} lift={i * slab.pitch} heavy={i === slabs - 1} read={asking && i === slabs - 1} />
       ))}
 
       <IsoBox cx={geo.api[0]} cy={geo.api[1]} {...box} />
@@ -83,6 +86,9 @@ export function Poster({ geo, state, labelsOnly }: Props) {
       <IsoBox cx={geo.start[0]} cy={geo.start[1]} {...batch} />
       <IsoBox cx={gate.x} cy={gate.bot} {...post} tone="ink" />
       {stopped && <IsoBox cx={geo.stop[0]} cy={geo.stop[1]} {...batch} tone="red" />}
+
+      {/* the delete request: the ink block stopped at the empty socket */}
+      {refusing && <IsoBox cx={geo.socket.x} cy={geo.socket.y} {...geo.pulse} tone="ink" />}
 
       {asking && <polyline className="p-read" points={geo.read(slabs).map((p) => p.join(' ')).join(' ')} />}
     </>
@@ -101,7 +107,7 @@ export function Poster({ geo, state, labelsOnly }: Props) {
         {geo.labels
           .filter((l) => !l.stoppedOnly || stopped)
           .map((l) => (
-            <text key={l.lines.join(' ')} className={l.cls} x={l.x} y={l.y} textAnchor={l.anchor}>
+            <text key={l.lines.join(' ')} className={l.socket && (asking || refusing) ? 'm ink' : l.cls} x={l.x} y={l.y} textAnchor={l.anchor}>
               {l.lines.length === 1
                 ? l.lines[0]
                 : l.lines.map((t, i) => (

@@ -13,7 +13,8 @@ export const MAX_SLABS = 6;
 export const START_SLABS = 4;
 
 /** What the scene shows. */
-export type Scene = 'clean' | 'bad' | 'ask';
+/** `ask` is the recorded read question; `refuse` is the recorded delete request, which stops at the empty socket. */
+export type Scene = 'clean' | 'bad' | 'ask' | 'refuse';
 /**
  * `last` is what the scene shows; `pressed` is which button the user last pressed (nothing on load and
  * after Start over). They are separate on purpose.
@@ -40,6 +41,8 @@ export type Label = {
   cls?: 'm' | 'r';
   /** Only while the bad batch sits stopped at the gate. */
   stoppedOnly?: boolean;
+  /** The socket's "no write tool" label: full ink while a question plays. */
+  socket?: boolean;
 };
 
 export type Geo = {
@@ -47,6 +50,8 @@ export type Geo = {
   W: number;
   H: number;
   batch: { side: number; h: number };
+  /** The small ink block that carries a question from the agent. */
+  pulse: { side: number; h: number };
   slab: { side: number; h: number; pitch: number };
   box: { side: number; h: number };
   post: { side: number; h: number };
@@ -61,6 +66,8 @@ export type Geo = {
   hover: number;
   tracks: { pre: P[]; mid: P[]; toApi: P[]; toAgent: P[]; bad: P[]; rail: P[]; stem: P[] };
   read: (n: number) => P[];
+  /** The delete request's path: down the stem from the agent to the middle of the empty socket. */
+  refuse: P[];
   labels: Label[];
 };
 
@@ -85,6 +92,7 @@ function wideGeo(): Geo {
     W: 1060,
     H: 276,
     batch,
+    pulse: { side: 24, h: 10 },
     slab,
     box,
     post,
@@ -107,6 +115,7 @@ function wideGeo(): Geo {
     },
     // agent, through the read API, into the top slab
     read: (n) => [[AGENT_X, READ_Y], [STACK_X, READ_Y], [STACK_X, slabTop(MAIN, n, slab.pitch, slab.h)]],
+    refuse: [[AGENT_X, MAIN + half(box.side) * SIN + 6], [socket.x, socket.y]],
     labels: [
       { lines: ['batches'], x: START_X, y: MAIN - batch.h * COS - 28, anchor: 'middle' },
       { lines: ['DQ gate'], x: GATE_X + 14, y: MAIN - 12 },
@@ -115,7 +124,7 @@ function wideGeo(): Geo {
       { lines: ['GET only'], x: API_X, y: nameY + 16, anchor: 'middle', cls: 'm' },
       { lines: ['agent'], x: AGENT_X, y: nameY, anchor: 'middle' },
       { lines: ['LangChain'], x: AGENT_X, y: nameY + 16, anchor: 'middle', cls: 'm' },
-      { lines: ['read only: no write tool'], x: socket.x + 30, y: socket.y + 34, anchor: 'end', cls: 'm' },
+      { lines: ['read only: no write tool'], x: socket.x + 30, y: socket.y + 34, anchor: 'end', cls: 'm', socket: true },
       { lines: ['Stopped at the gate ·', 'nothing written'], x: GATE_X - 14, y: BAD + 32, anchor: 'end', cls: 'r', stoppedOnly: true },
     ],
   };
@@ -144,6 +153,7 @@ function narrowGeo(): Geo {
     W: 320,
     H: 504,
     batch,
+    pulse: { side: 20, h: 9 },
     slab,
     box,
     post,
@@ -166,6 +176,7 @@ function narrowGeo(): Geo {
     },
     // agent, up through the read API, into the top slab
     read: (n) => [[readX, AGENT_Y - 20], [readX, slabTop(MAIN, n, slab.pitch, slab.h)]],
+    refuse: [[COL, AGENT_Y + boxBot + 6], [socket.x, socket.y]],
     labels: [
       { lines: ['batches'], x: START_X, y: MAIN - batch.h * COS - 28, anchor: 'middle' },
       { lines: ['DQ gate'], x: GATE_X, y: GATE_TOP - post.h * COS - 12, anchor: 'middle' },
@@ -174,7 +185,7 @@ function narrowGeo(): Geo {
       { lines: ['GET only'], x: side, y: API_Y - 5, anchor: 'end', cls: 'm' },
       { lines: ['agent'], x: side, y: AGENT_Y - 22, anchor: 'end' },
       { lines: ['LangChain'], x: side, y: AGENT_Y - 5, anchor: 'end', cls: 'm' },
-      { lines: ['read only:', 'no write tool'], x: socket.x - half(socket.side) - 10, y: socket.y - 2, anchor: 'end', cls: 'm' },
+      { lines: ['read only:', 'no write tool'], x: socket.x - half(socket.side) - 10, y: socket.y - 2, anchor: 'end', cls: 'm', socket: true },
       { lines: ['Stopped at the gate ·', 'nothing written'], x: 4, y: BAD + 32, cls: 'r', stoppedOnly: true },
     ],
   };
