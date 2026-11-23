@@ -20,6 +20,7 @@ export function CaseLinks({ items }: { items: [string, string][] }) {
           {...(label === 'Live demo' && { target: '_blank', rel: 'noopener noreferrer' })}
         >
           {label}
+          {label === 'Live demo' && <span className="sr-only"> (opens in a new tab)</span>}
         </a>
       ))}
     </div>

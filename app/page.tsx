@@ -34,7 +34,7 @@ export default function Home() {
               Case study
             </a>
             <a href={links.rtdp.code}>Code</a>
-            <a href={links.rtdp.demo} target="_blank" rel="noopener noreferrer">Live demo (read API only)</a>
+            <a href={links.rtdp.demo} target="_blank" rel="noopener noreferrer">Live demo (read API only)<span className="sr-only"> (opens in a new tab)</span></a>
           </div>
         </article>
 
@@ -53,7 +53,7 @@ export default function Home() {
               Case study
             </a>
             <a href={links.proptalk.code}>Code</a>
-            <a href={links.proptalk.demo} target="_blank" rel="noopener noreferrer">Live demo</a>
+            <a href={links.proptalk.demo} target="_blank" rel="noopener noreferrer">Live demo<span className="sr-only"> (opens in a new tab)</span></a>
           </div>
         </article>
 
