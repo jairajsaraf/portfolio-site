@@ -577,6 +577,51 @@ footer.site {
   stroke: var(--red);
   stroke-width: 3;
 }
+/* W3-B: the two views. Without JS the switch is hidden (.controls) and the guard-on view is the end state.
+   The draw-in starts hidden only with JS, and not when the page is "still" (see layout.tsx). */
+.ptd .controls {
+  margin: 0 0 16px;
+}
+.dg-attack.heavy {
+  stroke-width: 2.25;
+}
+.dg-eval,
+.dg-eval-note,
+.dg-test {
+  transition: opacity 0.2s ease-out;
+}
+.dg-test {
+  opacity: 0;
+}
+.ptd[data-view='bypassed'] .dg-eval,
+.ptd[data-view='bypassed'] .dg-eval-note {
+  opacity: 0;
+}
+.ptd[data-view='bypassed'] .dg-test {
+  opacity: 1;
+}
+.ptd[data-view='bypassed'] .dg-guard .dg-node {
+  fill: none;
+  stroke-dasharray: 5 4;
+}
+.dg-reveal,
+.dg-reveal-test {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+}
+.js:not(.still) .dg-reveal {
+  transform: scaleY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js:not(.still) .dg-reveal {
+    transform: none;
+  }
+  .dg-eval,
+  .dg-eval-note,
+  .dg-test {
+    transition: none;
+  }
+}
 
 .controls {
   display: flex;
