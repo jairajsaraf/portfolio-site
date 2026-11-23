@@ -14,7 +14,11 @@ export function CaseLinks({ items }: { items: [string, string][] }) {
   return (
     <div className="links">
       {items.map(([label, href]) => (
-        <a key={label} href={href}>
+        <a
+          key={label}
+          href={href}
+          {...(label === 'Live demo' && { target: '_blank', rel: 'noopener noreferrer' })}
+        >
           {label}
         </a>
       ))}
