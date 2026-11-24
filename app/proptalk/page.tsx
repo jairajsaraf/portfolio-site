@@ -34,8 +34,9 @@ export default function PropTalk() {
           <div className="built">
             <h2>What I built.</h2>
             <p>
-              A Streamlit app where you pick SQL or pandas and ask a question. pandas code runs in a separate process on
-              a copy of the data, with a timeout.
+              A Streamlit app where you pick SQL or pandas and ask a question. The question and the table schema go to
+              any OpenAI-compatible model, which returns code. pandas code runs in a separate process on a copy of the
+              data, with a timeout.
             </p>
           </div>
         </div>
