@@ -103,6 +103,44 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* O1: a figure links to the line that states it. Hairline in --grid, ink on hover, so case links stay louder. */
+.num.src {
+  position: relative;
+  text-decoration: underline 1px var(--grid);
+  text-underline-offset: 3px;
+}
+.num.src:hover,
+.num.src:focus-visible {
+  text-decoration-color: currentColor;
+}
+.src-path {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 2px); /* above the figure: it never covers the next line (owner, 2026-11-23) */
+  z-index: 2;
+  padding: 1px 4px;
+  border: 1px solid var(--grid);
+  background: var(--page);
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 11px;
+  word-spacing: normal;
+  white-space: nowrap;
+}
+.num.src:hover .src-path,
+.num.src:focus-visible .src-path {
+  display: block;
+}
+/* Narrow screens: the box docks at the bottom edge, like a browser status bar, so it never widens the page. */
+@media (max-width: 760px) {
+  .src-path {
+    position: fixed;
+    left: 8px;
+    bottom: 8px;
+  }
+}
+
 .miss {
   color: var(--red-text);
   font-weight: 600;

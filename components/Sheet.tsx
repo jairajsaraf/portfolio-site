@@ -3,6 +3,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { animate, useInView, useReducedMotion } from 'motion/react';
 import { Num } from './Num';
+import { src } from '@/lib/links';
 
 // Every axis cell has the same width, so percentage x positions line up
 // to the pixel across rows. Gridlines every 0.1.
@@ -128,8 +129,8 @@ export function SheetRow({ id, first, link = true }: RowProps) {
           </span>
         </div>
         <div className="say">
-          <b>Parity:</b> both runtimes give the same row counts on all four layers (<Num>8,340</Num> and{' '}
-          <Num>469,420</Num>), and every checksum matches.
+          <b>Parity:</b> both runtimes give the same row counts on all four layers (<Num src={src.rentals.sheet}>8,340</Num> and{' '}
+          <Num src={src.rentals.sheet}>469,420</Num>), and every checksum matches.
         </div>
       </div>
     );
@@ -141,8 +142,8 @@ export function SheetRow({ id, first, link = true }: RowProps) {
         <Axis ci={[35, 88]} dot={66.7} bar={75} first={first} />
         {first && <TickRow className="first-ticks" />}
         <div className="say">
-          <b>Agent eval:</b> <Num miss>6 of 9</Num> tasks passed (95% CI <Num>0.35–0.88</Num>), short of the{' '}
-          <Num>0.75</Num> bar I set before the first run.
+          <b>Agent eval:</b> <Num miss src={src.rtdp.run3}>6 of 9</Num> tasks passed (95% CI <Num src={src.rtdp.run3}>0.35–0.88</Num>), short of the{' '}
+          <Num src={src.rtdp.bar}>0.75</Num> bar I set before the first run.
         </div>
       </div>
     );
@@ -154,8 +155,8 @@ export function SheetRow({ id, first, link = true }: RowProps) {
         <Axis ci={[75, 98]} dot={92} bar={80} first={first} ciEnd />
         {first && <TickRow className="first-ticks" />}
         <div className="say">
-          <b>Eval, SQL mode:</b> <Num>23 of 25</Num> questions correct (95% CI <Num>0.75–0.98</Num>), above the{' '}
-          <Num>0.8</Num> bar.
+          <b>Eval, SQL mode:</b> <Num src={src.proptalk.questions}>23 of 25</Num> questions correct (95% CI <Num src={src.proptalk.questions}>0.75–0.98</Num>), above the{' '}
+          <Num src={src.proptalk.questions}>0.8</Num> bar.
         </div>
       </div>
     );
@@ -166,8 +167,8 @@ export function SheetRow({ id, first, link = true }: RowProps) {
       <Axis ci={[31, 86]} dot={62.5} bar={87.5} first={first} />
       {first && <TickRow className="first-ticks" />}
       <div className="say">
-        <b>Attacks, SQL mode:</b> <Num miss>5 of 8</Num> refused or blocked, under the <Num>0.875</Num> bar. pandas mode:{' '}
-        <Num>0 of 8</Num>. No attack did any harm.
+        <b>Attacks, SQL mode:</b> <Num miss src={src.proptalk.attacks}>5 of 8</Num> refused or blocked, under the <Num src={src.proptalk.attacks}>0.875</Num> bar. pandas mode:{' '}
+        <Num src={src.proptalk.attacks}>0 of 8</Num>. No attack did any harm.
       </div>
     </div>
   );

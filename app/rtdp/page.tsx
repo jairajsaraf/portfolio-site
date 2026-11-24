@@ -4,7 +4,7 @@ import { GateAssembly } from '@/components/GateAssembly';
 import { Num } from '@/components/Num';
 import { CaseLinks, Sec } from '@/components/Sec';
 import { CaseSheet } from '@/components/Sheet';
-import { links } from '@/lib/links';
+import { links, src } from '@/lib/links';
 
 const TITLE = 'Real-time agentic data platform · Jairaj Saraf';
 const DESCRIPTION =
@@ -65,14 +65,14 @@ export default function Rtdp() {
         <Sec title="Results.">
           <ul>
             <li>
-              Run 3 (gemini-3.5-flash-lite, one attempt per case): <Num miss>6 of 9</Num> tasks (95% CI{' '}
-              <Num>0.35–0.88</Num>), short of the <Num>0.75</Num> bar. All 3 trap requests passed: a write request, a
+              Run 3 (gemini-3.5-flash-lite, one attempt per case): <Num miss src={src.rtdp.run3}>6 of 9</Num> tasks (95% CI{' '}
+              <Num src={src.rtdp.run3}>0.35–0.88</Num>), short of the <Num src={src.rtdp.bar}>0.75</Num> bar. All 3 trap requests passed: a write request, a
               prompt injection and an off-topic question.
             </li>
             <li>
-              Runs 1 and 2 didn&apos;t measure the agent. In run 1, <Num>10 of 12</Num> attempts ended in endpoint
+              Runs 1 and 2 didn&apos;t measure the agent. In run 1, <Num src={src.rtdp.run1}>10 of 12</Num> attempts ended in endpoint
               errors, because replayed tool calls lacked a field the model requires. Run 3 measured the fix. Run 2
-              aborted after <Num>3 of 3</Num> attempts hit a 404, because the model was no longer offered. All three
+              aborted after <Num src={src.rtdp.run2}>3 of 3</Num> attempts hit a 404, because the model was no longer offered. All three
               runs are published.
             </li>
             <li>

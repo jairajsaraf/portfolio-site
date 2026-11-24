@@ -4,7 +4,7 @@ import { Num } from '@/components/Num';
 import { RentalsWedge } from '@/components/RentalsWedge';
 import { CaseLinks, Sec } from '@/components/Sec';
 import { CaseSheet } from '@/components/Sheet';
-import { links } from '@/lib/links';
+import { links, src } from '@/lib/links';
 
 // Copy: ideas/rentals-content.md section 2, approved by the owner at checkpoint 2 (2026-11-23), word for word.
 const TITLE = 'Rentals data pipeline · Jairaj Saraf';
@@ -60,18 +60,18 @@ export default function Rentals() {
 
         <Sec title="How I measured it.">
           <p>
-            I ran one copy of the CSV through local PySpark <Num>3.5.4</Num> in Docker and through Databricks Free
-            Edition serverless Spark <Num>4.2.0</Num>. The parity script hashes the input on both sides and refuses to
+            I ran one copy of the CSV through local PySpark <Num src={src.rentals.runtimes}>3.5.4</Num> in Docker and through Databricks Free
+            Edition serverless Spark <Num src={src.rentals.runtimes}>4.2.0</Num>. The parity script hashes the input on both sides and refuses to
             compare runs of different files. The checksums are sums of hashes, so row order doesn&apos;t change them. The
             whole-row checksum also changes when a value moves to the wrong record. Tests check both cases, plus a single
-            rent changed by <Num>0.01</Num>. CI runs those tests and never touches Databricks.
+            rent changed by <Num src={src.rentals.checksumTest}>0.01</Num>. CI runs those tests and never touches Databricks.
           </p>
         </Sec>
 
         <Sec title="Results (parity report of 2026-11-07):">
           <ul>
             <li>
-              Both runtimes give the same row counts on all four layers (<Num>8,340</Num> and <Num>469,420</Num>), and
+              Both runtimes give the same row counts on all four layers (<Num src={src.rentals.rows}>8,340</Num> and <Num src={src.rentals.rows}>469,420</Num>), and
               every checksum matches. The Databricks side is one manual run saved in the repo, and re-running it needs a
               Databricks login.
             </li>
@@ -80,11 +80,11 @@ export default function Rentals() {
               redone from the committed files alone.
             </li>
             <li>
-              Both sides dropped <Num>706,520</Num> rows with no rent and found <Num>0</Num> duplicates.
+              Both sides dropped <Num src={src.rentals.dropped}>706,520</Num> rows with no rent and found <Num src={src.rentals.dropped}>0</Num> duplicates.
             </li>
             <li>
-              Data-quality checks: <Num>4 of 4</Num> passed locally. On Databricks, the rent-range check failed{' '}
-              <Num>0</Num> rows.
+              Data-quality checks: <Num src={src.rentals.dq}>4 of 4</Num> passed locally. On Databricks, the rent-range check failed{' '}
+              <Num src={src.rentals.dq}>0</Num> rows.
             </li>
           </ul>
         </Sec>
