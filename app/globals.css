@@ -874,7 +874,7 @@ html:not(.js) .controls {
   cursor: pointer;
 }
 .sec details > ul {
-  margin-top: 8px;
+  margin-top: 20px; /* room for a first-line figure's path box (20.5 px + 2 px gap) above it */
 }
 .sec .links {
   margin-top: 12px; /* was 0: the links sat flush under the paragraph */
