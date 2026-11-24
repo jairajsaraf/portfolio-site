@@ -34,12 +34,8 @@ export default function PropTalk() {
           <div className="built">
             <h2>What I built.</h2>
             <p>
-              A Streamlit app where you pick SQL or pandas and ask a question. The question and the table schema go to
-              any OpenAI-compatible model, which returns code. SQL passes a text guard (SELECT only, a keyword blocklist,
-              a table allowlist, a row cap), then runs in an in-memory SQLite engine that enforces its own rules: an
-              authorizer allowlist, <code className="num">PRAGMA query_only</code>, a 5-second time budget, and a{' '}
-              <Num src={src.proptalk.rowCap}>10,000</Num>-row cap. Those engine rules hold even with the guard bypassed, and a test suite attacks
-              them. pandas code runs in a separate process on a copy of the data, with a timeout.
+              A Streamlit app where you pick SQL or pandas and ask a question. pandas code runs in a separate process on
+              a copy of the data, with a timeout.
             </p>
           </div>
         </div>

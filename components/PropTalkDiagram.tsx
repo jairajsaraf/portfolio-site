@@ -20,7 +20,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const TITLE = 'How PropTalk answers a question in SQL mode';
 const DESC =
-  "The question goes to the model, which returns SQL. The SQL passes a text guard, then runs in an in-memory SQLite engine that enforces its own rules, and the answer comes back as a chart and a table. Dashed lines mark the attack cases from the first repetition: each ends at the model, which refused it, at the guard, which rejected its SQL, or as a plain SELECT that did no harm. With the guard bypassed, the guard is drawn dashed and the test suite's attacks go straight to the engine, whose rules stop them.";
+  "The question goes to the model, which returns SQL. The SQL passes a text guard (SELECT only, a keyword blocklist, a table allowlist, a row cap), then runs in an in-memory SQLite engine that enforces its own rules (an authorizer allowlist, PRAGMA query_only, a 5-second time budget and a 10,000-row cap), and the answer comes back as a chart and a table. Dashed lines mark the attack cases from the first repetition: each ends at the model, which refused it, at the guard, which rejected its SQL, or as a plain SELECT that did no harm. With the guard bypassed, the guard is drawn dashed and the test suite's attacks go straight to the engine, whose rules stop them.";
 
 const LIVE = {
   on: 'Guard on: the attack cases end at the model, at the guard, or as plain SELECTs that did no harm.',

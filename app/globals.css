@@ -870,6 +870,12 @@ html:not(.js) .controls {
 .sec li + li {
   margin-top: 8px;
 }
+.sec summary {
+  cursor: pointer;
+}
+.sec details > ul {
+  margin-top: 8px;
+}
 .sec .links {
   margin-top: 12px; /* was 0: the links sat flush under the paragraph */
 }
