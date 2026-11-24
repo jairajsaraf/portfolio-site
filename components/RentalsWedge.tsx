@@ -63,7 +63,21 @@ export function RentalsWedge() {
     runs[3].then(() => undash(arrow));
     runs[4].then(() => undash(bars));
     runs[5].then(() => undash(bracket));
-    return () => runs.forEach((r) => r.stop());
+    // If reduced motion flips on mid-play, stop() alone would freeze the chart part-drawn in inline styles, so
+    // write the end frame explicitly (the same frame the CSS gives with no JS).
+    return () => {
+      runs.forEach((r) => r.stop());
+      q<SVGElement>('[data-fill]').forEach((el) => (el.style.clipPath = 'inset(0 0% 0 0)'));
+      q<SVGElement>('[data-empty]').forEach((el) => {
+        el.style.opacity = '0';
+        el.style.transform = 'none';
+      });
+      fades.forEach((el) => (el.style.opacity = '1'));
+      [...arrow, ...bars, ...bracket].forEach((el) => {
+        el.style.strokeDashoffset = '0';
+        el.style.strokeDasharray = 'none';
+      });
+    };
   }, [inView, reduce]);
 
   return (
