@@ -371,6 +371,13 @@ h1 {
 .js:not(.still) [data-case] {
   fill-opacity: 0;
 }
+/* The strip sits above the sentence, so there the path box goes below the figure (owner, 2026-11-23). */
+@media (min-width: 761px) {
+  .say:has(.cases) .src-path {
+    bottom: auto;
+    top: calc(100% + 2px);
+  }
+}
 
 /* ---------- projects ---------- */
 .projects {
