@@ -54,7 +54,6 @@ export const src = {
     bar: rtdp('README.md', 220),
   },
   proptalk: {
-    rowCap: pt('README.md', 26),
     setup: pt('README.md', 61),
     questions: pt('README.md', 68),
     attacks: pt('README.md', 73),
