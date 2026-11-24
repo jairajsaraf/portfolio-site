@@ -75,7 +75,7 @@ export default function Rtdp() {
             </li>
           </ul>
           <details>
-            <summary>Runs 1 and 2, and the three failures</summary>
+            <summary>Runs 1 and 2, and the three failures (one fix not yet measured)</summary>
             <ul>
               <li>
                 In run 1, <Num src={src.rtdp.run1}>10 of 12</Num> attempts ended in endpoint errors, because replayed tool calls
