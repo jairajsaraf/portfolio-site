@@ -103,6 +103,53 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* O1: a figure links to the line that states it. Hairline in --grid, ink on hover, so case links stay louder. */
+.num.src {
+  position: relative;
+  text-decoration: underline 1px var(--grid);
+  text-underline-offset: 3px;
+}
+.num.src:hover,
+.num.src:focus-visible {
+  text-decoration-color: currentColor;
+}
+.src-path {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 2px); /* above the figure: it never covers the next line (owner, 2026-11-23) */
+  z-index: 2;
+  padding: 1px 4px;
+  border: 1px solid var(--grid);
+  background: var(--page);
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 11px;
+  word-spacing: normal;
+  white-space: nowrap;
+}
+/* Invisible bridge over the 2px gap, so the pointer can move onto the box without losing the hover (WCAG 1.4.13 hoverable). */
+.src-path::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 4px;
+}
+.num.src:hover .src-path,
+.num.src:focus-visible .src-path {
+  display: block;
+}
+/* Narrow screens: the box docks at the bottom edge, like a browser status bar, so it never widens the page. */
+@media (max-width: 760px) {
+  .src-path {
+    position: fixed;
+    left: 8px;
+    bottom: 8px;
+  }
+}
+
 .miss {
   color: var(--red-text);
   font-weight: 600;
@@ -317,6 +364,30 @@ h1 {
   transform: scale(0.5);
 }
 
+/* O2: counted cases. Ink only, square corners, filled = passed; drawn filled without JS or with reduced motion. */
+.cases {
+  display: block;
+  margin-bottom: 6px;
+}
+.cases rect {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.cases .pass {
+  fill: var(--ink);
+}
+.js:not(.still) [data-case] {
+  fill-opacity: 0;
+}
+/* The strip sits above the sentence, so there the path box goes below the figure (owner, 2026-11-23). */
+@media (min-width: 761px) {
+  .say:has(.cases) .src-path {
+    bottom: auto;
+    top: calc(100% + 2px);
+  }
+}
+
 /* ---------- projects ---------- */
 .projects {
   display: grid;
@@ -499,6 +570,7 @@ footer.site {
 }
 .p-edge.red { stroke: var(--red); }
 .p-edge.heavy { stroke-width: 2.4; }
+.p-edge.read { stroke-width: 3.4; }
 .f-top-plain { fill: var(--face-top); }
 .f-left-plain { fill: var(--face-left); }
 .f-right-plain { fill: var(--face-right); }
@@ -544,6 +616,9 @@ footer.site {
 .dg text.r {
   fill: var(--red-text);
 }
+.p-labels text.m.ink {
+  fill: var(--ink);
+}
 /* In the column geometries the mono labels are 13 units, so they stay 11 px or more at 320 px. */
 .stage.narrow .p-labels text.m,
 .dg.narrow text.m {
@@ -576,6 +651,52 @@ footer.site {
   fill: none;
   stroke: var(--red);
   stroke-width: 3;
+}
+/* W3-B: the two views. Without JS the switch is hidden (.controls) and the guard-on view is the end state.
+   The draw-in starts hidden only with JS, and not when the page is "still" (see layout.tsx). */
+.ptd .controls {
+  margin: 0 0 16px;
+}
+.dg-attack.heavy {
+  stroke-width: 2.25;
+}
+.dg-eval,
+.dg-eval-note,
+.dg-test {
+  transition: opacity 0.2s ease-out;
+}
+.dg-test {
+  opacity: 0;
+}
+.ptd[data-view='bypassed'] .dg-eval,
+.ptd[data-view='bypassed'] .dg-eval-note {
+  opacity: 0;
+}
+.ptd[data-view='bypassed'] .dg-test {
+  opacity: 1;
+}
+.ptd[data-view='bypassed'] .dg-guard .dg-node,
+.ptd[data-view='bypassed'] .dg-guard path {
+  fill: none;
+  stroke-dasharray: 5 4;
+}
+.dg-reveal,
+.dg-reveal-test {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+}
+.js:not(.still) .dg-reveal {
+  transform: scaleY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js:not(.still) .dg-reveal {
+    transform: none;
+  }
+  .dg-eval,
+  .dg-eval-note,
+  .dg-test {
+    transition: none;
+  }
 }
 
 .controls {
@@ -659,6 +780,45 @@ html:not(.js) .controls {
   border: 0;
 }
 
+/* "Ask the agent": the saved answers. Without JS both show in order; with JS only the asked one is rendered, so
+   the block is empty on load and grows on press (owner's choice, 2026-11-23). */
+.qa {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 64ch;
+}
+.qa-note {
+  margin: 0;
+  color: var(--muted);
+}
+.qa figure {
+  margin: 10px 0 0;
+}
+.js .qa figure:not(.on) {
+  display: none;
+}
+.qa figure p {
+  margin: 0;
+}
+.qa blockquote {
+  margin: 6px 0 0;
+  padding-left: 12px;
+  border-left: 1.5px solid var(--ink);
+  overflow-wrap: anywhere;
+}
+.qa blockquote ul {
+  margin: 2px 0 0;
+  padding-left: 18px;
+}
+.qa figcaption {
+  margin-top: 4px;
+  padding-left: 13.5px;
+  font: 400 12px var(--mono);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 /* The stages sit under the picture, in columns that start under the stage each one describes. The column widths
    follow the 1060-unit wide viewBox: ingest 0 to 296, DQ gate (rail at 320) 296 to 640, read API (box at 720)
    640 to 820, agent (box at 920) 820 to 1060. */
@@ -718,6 +878,12 @@ html:not(.js) .controls {
 }
 .sec li + li {
   margin-top: 8px;
+}
+.sec summary {
+  cursor: pointer;
+}
+.sec details > ul {
+  margin-top: 20px; /* room for a first-line figure's path box (20.5 px + 2 px gap) above it */
 }
 .sec .links {
   margin-top: 12px; /* was 0: the links sat flush under the paragraph */
@@ -867,6 +1033,9 @@ html:not(.js) .controls {
     opacity: 1;
     transform: none;
   }
+  .js:not(.still) [data-case] {
+    fill-opacity: 1;
+  }
   .row,
   .axis .grid line,
   .tile h2 a,
@@ -887,4 +1056,86 @@ html:not(.js) .controls {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------- /rentals/: the wedge (W4-A) ---------- */
+/* End frame by default (no JS); the start state needs JS and not "still", and reduced motion keeps the end frame. */
+.wedge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  column-gap: 20px;
+  align-items: center;
+}
+.wg-tick,
+.wg-axis,
+.wg-cap {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.wg-plot {
+  position: relative;
+  height: 180px;
+  margin-top: 4px;
+  border: 1px solid var(--muted);
+}
+.wg-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.wg-filled { fill: var(--ink); }
+.wg-empty { fill: var(--grid); }
+.wg-gone { opacity: 0; }
+.wg-gap {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 13.5px;
+}
+.wg-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.wg-cap { margin-top: 2px; }
+.wg-arrow {
+  width: 52px;
+  height: 12px;
+  overflow: visible;
+}
+.wg-arrow path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.stages.r4 { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 24px; }
+.js:not(.still) .wedge .wg-gone { opacity: 1; }
+.js:not(.still) .wedge [data-fill] { clip-path: inset(0 100% 0 0); }
+.js:not(.still) .wedge [data-fade] { opacity: 0; }
+.js:not(.still) .wedge [data-arrow] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js:not(.still) .wedge .wg-gone { opacity: 0; }
+  .js:not(.still) .wedge [data-fill] { clip-path: none; }
+  .js:not(.still) .wedge [data-fade] { opacity: 1; }
+  .js:not(.still) .wedge [data-arrow] {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}
+@media (max-width: 1139px) {
+  .stages.r4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+}
+@media (max-width: 760px) {
+  .wedge {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+  }
+  .wg-arrow { justify-self: center; transform: rotate(90deg); }
+  .stages.r4 { grid-template-columns: 1fr; }
 }

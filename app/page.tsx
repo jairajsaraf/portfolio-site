@@ -34,7 +34,7 @@ export default function Home() {
               Case study
             </a>
             <a href={links.rtdp.code}>Code</a>
-            <a href={links.rtdp.demo}>Live demo (read API only)</a>
+            <a href={links.rtdp.demo} target="_blank" rel="noopener noreferrer">Live demo (read API only)<span className="sr-only"> (opens in a new tab)</span></a>
           </div>
         </article>
 
@@ -53,13 +53,13 @@ export default function Home() {
               Case study
             </a>
             <a href={links.proptalk.code}>Code</a>
-            <a href={links.proptalk.demo}>Live demo</a>
+            <a href={links.proptalk.demo} target="_blank" rel="noopener noreferrer">Live demo<span className="sr-only"> (opens in a new tab)</span></a>
           </div>
         </article>
 
         <article className="tile">
           <h2>
-            <a href={links.rentals.code}>Rentals data pipeline</a>
+            <a href="/rentals/">Rentals data pipeline</a>
           </h2>
           <p className="src">Real public data (Zillow ZORI). The CSV isn&apos;t in the repo.</p>
           <p className="what">
@@ -71,9 +71,10 @@ export default function Home() {
             download step is a stub.
           </p>
           <div className="links">
-            <a className="primary" href={links.rentals.code}>
-              Code
+            <a className="primary" href="/rentals/">
+              Case study
             </a>
+            <a href={links.rentals.code}>Code</a>
           </div>
         </article>
       </section>

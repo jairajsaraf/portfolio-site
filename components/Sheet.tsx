@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, type RefObject } from 'react';
 import { animate, useInView, useReducedMotion } from 'motion/react';
-import { links } from '@/lib/links';
 import { Num } from './Num';
+import { src } from '@/lib/links';
 
 // Every axis cell has the same width, so percentage x positions line up
 // to the pixel across rows. Gridlines every 0.1.
@@ -92,7 +92,18 @@ function Proj({ name, small, href }: { name: string; small: string; href?: strin
   );
 }
 
-export type RowId = 'rtdp' | 'sql' | 'attack';
+/** O2: one square per case, filled = passed. Decoration: the sentence beside it states the count. */
+function Cases({ pass, of }: { pass: number; of: number }) {
+  return (
+    <svg className="cases" width={of * 10 - 2} height="8" aria-hidden="true" focusable="false" shapeRendering="crispEdges">
+      {Array.from({ length: of }, (_, i) => (
+        <rect key={i} className={i < pass ? 'pass' : undefined} data-case={i < pass ? '' : undefined} x={i * 10 + 0.5} y="0.5" width="7" height="7" />
+      ))}
+    </svg>
+  );
+}
+
+export type RowId ='rtdp' | 'sql' | 'attack' | 'rentals';
 
 type RowProps = {
   id: RowId;
@@ -105,6 +116,36 @@ type RowProps = {
 /** One row of the results sheet. The landing page and the case studies both draw rows from here. */
 export function SheetRow({ id, first, link = true }: RowProps) {
   const cls = first ? 'row first' : 'row';
+  if (id === 'rentals') {
+    return (
+      <div className="row rentals">
+        <Proj name="Rentals data pipeline" small="Real public data (Zillow ZORI)" href={link ? '/rentals/' : undefined} />
+        <div className="twin">
+          <span className="lbl l1">Local Spark</span>
+          <span className="lbl l2">Databricks</span>
+          <svg className="twinsvg" height="44" aria-hidden="true" focusable="false">
+            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="11" y2="11" />
+            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="33" y2="33" />
+            <g className="bracket">
+              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="11" y2="11" />
+              <line data-bracket pathLength={1} x1="95%" x2="95%" y1="11" y2="33" />
+              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="33" y2="33" />
+            </g>
+          </svg>
+          <span className="val v1">
+            <Num>469,420</Num> rows
+          </span>
+          <span className="val v2">
+            <Num>469,420</Num> rows
+          </span>
+        </div>
+        <div className="say">
+          <b>Parity:</b> both runtimes give the same row counts on all four layers (<Num src={src.rentals.sheet}>8,340</Num> and{' '}
+          <Num src={src.rentals.sheet}>469,420</Num>), and every checksum matches.
+        </div>
+      </div>
+    );
+  }
   if (id === 'rtdp') {
     return (
       <div className={cls}>
@@ -112,8 +153,9 @@ export function SheetRow({ id, first, link = true }: RowProps) {
         <Axis ci={[35, 88]} dot={66.7} bar={75} first={first} />
         {first && <TickRow className="first-ticks" />}
         <div className="say">
-          <b>Agent eval:</b> <Num miss>6 of 9</Num> tasks passed (95% CI <Num>0.35–0.88</Num>), short of the{' '}
-          <Num>0.75</Num> bar I set before the first run.
+          <Cases pass={6} of={9} />
+          <b>Agent eval:</b> <Num miss src={src.rtdp.run3}>6 of 9</Num> tasks passed (95% CI <Num src={src.rtdp.run3}>0.35–0.88</Num>), short of the{' '}
+          <Num src={src.rtdp.bar}>0.75</Num> bar I set before the first run.
         </div>
       </div>
     );
@@ -125,8 +167,9 @@ export function SheetRow({ id, first, link = true }: RowProps) {
         <Axis ci={[75, 98]} dot={92} bar={80} first={first} ciEnd />
         {first && <TickRow className="first-ticks" />}
         <div className="say">
-          <b>Eval, SQL mode:</b> <Num>23 of 25</Num> questions correct (95% CI <Num>0.75–0.98</Num>), above the{' '}
-          <Num>0.8</Num> bar.
+          <Cases pass={23} of={25} />
+          <b>Eval, SQL mode:</b> <Num src={src.proptalk.questions}>23 of 25</Num> questions correct (95% CI <Num src={src.proptalk.questions}>0.75–0.98</Num>), above the{' '}
+          <Num src={src.proptalk.questions}>0.8</Num> bar.
         </div>
       </div>
     );
@@ -137,8 +180,9 @@ export function SheetRow({ id, first, link = true }: RowProps) {
       <Axis ci={[31, 86]} dot={62.5} bar={87.5} first={first} />
       {first && <TickRow className="first-ticks" />}
       <div className="say">
-        <b>Attacks, SQL mode:</b> <Num miss>5 of 8</Num> refused or blocked, under the <Num>0.875</Num> bar. pandas mode:{' '}
-        <Num>0 of 8</Num>. No attack did any harm.
+        <Cases pass={5} of={8} />
+        <b>Attacks, SQL mode:</b> <Num miss src={src.proptalk.attacks}>5 of 8</Num> refused or blocked, under the <Num src={src.proptalk.attacks}>0.875</Num> bar. pandas mode:{' '}
+        <Num miss src={src.proptalk.attacks}>0 of 8</Num>. No attack did any harm.
       </div>
     </div>
   );
@@ -175,6 +219,12 @@ function useDraw(ref: RefObject<HTMLElement | null>) {
     q<SVGElement>('[data-dot]').forEach((el, i) => {
       animate(el, { opacity: [0, 1], scale: [0.5, 1] }, { duration: 0.2, ease: 'easeOut', delay: i * 0.08 + 0.3 });
     });
+    // O2: passed squares fill left to right, 40 ms apart, starting with their row's CI line.
+    q<SVGElement>('.cases').forEach((strip, i) => {
+      strip.querySelectorAll<SVGElement>('[data-case]').forEach((el, j) => {
+        animate(el, { fillOpacity: [0, 1] }, { duration: 0.1, delay: i * 0.08 + j * 0.04 });
+      });
+    });
 
     // Rentals parity: both bars grow at the same rate to the same length, then a thin bracket joins their right ends.
     const t0 = 0.25;
@@ -197,12 +247,14 @@ function useDraw(ref: RefObject<HTMLElement | null>) {
 export function CaseSheet({ rows }: { rows: RowId[] }) {
   const ref = useRef<HTMLDivElement>(null);
   useDraw(ref);
+  const scaled = rows.some((id) => id !== 'rentals'); // the rentals row has no 0 / 0.5 / 1 axis
   return (
     <div className={`sheet slice${rows.length === 1 ? ' one' : ''}`} ref={ref}>
+      {rows.includes('rentals') && <p className="sr-only">Rentals: local Spark and Databricks both give 469,420 rows.</p>}
       {rows.map((id, i) => (
-        <SheetRow key={id} id={id} first={i === 0} link={false} />
+        <SheetRow key={id} id={id} first={i === 0 && id !== 'rentals'} link={false} />
       ))}
-      <Ticks />
+      {scaled && <Ticks />}
     </div>
   );
 }
@@ -224,32 +276,7 @@ export function Sheet() {
 
       <Ticks />
 
-      <div className="row rentals">
-        <Proj name="Rentals data pipeline" small="Real public data (Zillow ZORI)" href={links.rentals.code} />
-        <div className="twin">
-          <span className="lbl l1">Local Spark</span>
-          <span className="lbl l2">Databricks</span>
-          <svg className="twinsvg" height="44" aria-hidden="true" focusable="false">
-            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="11" y2="11" />
-            <line data-twin pathLength={1} className="tbar" x1="0" x2="90%" y1="33" y2="33" />
-            <g className="bracket">
-              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="11" y2="11" />
-              <line data-bracket pathLength={1} x1="95%" x2="95%" y1="11" y2="33" />
-              <line data-bracket pathLength={1} x1="91.5%" x2="95%" y1="33" y2="33" />
-            </g>
-          </svg>
-          <span className="val v1">
-            <Num>469,420</Num> rows
-          </span>
-          <span className="val v2">
-            <Num>469,420</Num> rows
-          </span>
-        </div>
-        <div className="say">
-          <b>Parity:</b> both runtimes give the same row counts on all four layers (<Num>8,340</Num> and{' '}
-          <Num>469,420</Num>), and every checksum matches.
-        </div>
-      </div>
+      <SheetRow id="rentals" />
     </section>
   );
 }

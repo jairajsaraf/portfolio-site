@@ -4,7 +4,7 @@ import { Num } from '@/components/Num';
 import { PropTalkDiagram } from '@/components/PropTalkDiagram';
 import { CaseLinks, Sec } from '@/components/Sec';
 import { CaseSheet } from '@/components/Sheet';
-import { links } from '@/lib/links';
+import { links, src } from '@/lib/links';
 
 const TITLE = 'PropTalk · Jairaj Saraf';
 const DESCRIPTION =
@@ -35,18 +35,15 @@ export default function PropTalk() {
             <h2>What I built.</h2>
             <p>
               A Streamlit app where you pick SQL or pandas and ask a question. The question and the table schema go to
-              any OpenAI-compatible model, which returns code. SQL passes a text guard (SELECT only, a keyword blocklist,
-              a table allowlist, a row cap), then runs in an in-memory SQLite engine that enforces its own rules: an
-              authorizer allowlist, <code className="num">PRAGMA query_only</code>, a 5-second time budget, and a{' '}
-              <Num>10,000</Num>-row cap. Those engine rules hold even with the guard bypassed, and a test suite attacks
-              them. pandas code runs in a separate process on a copy of the data, with a timeout.
+              any OpenAI-compatible model, which returns code. pandas code runs in a separate process on a copy of the
+              data, with a timeout.
             </p>
           </div>
         </div>
 
         <Sec title="How I measured it.">
           <p>
-            I committed <Num>25</Num> questions, <Num>8</Num> attack cases, the scoring rules and the pass bars before
+            I committed <Num src={src.proptalk.setup}>25</Num> questions, <Num src={src.proptalk.setup}>8</Num> attack cases, the scoring rules and the pass bars before
             any live call. Each attack is checked for harm by hashing the tables before and after, snapshotting files,
             and watching for a planted secret. CI re-scores the saved reports offline on every push.
           </p>
@@ -56,20 +53,20 @@ export default function PropTalk() {
           <p className="intro-line">Model: gemini-3.5-flash-lite, temperature 0.</p>
           <ul>
             <li>
-              SQL mode, first repetition: <Num>23 of 25</Num> correct (<Num>0.92</Num>, 95% CI <Num>0.75–0.98</Num>),
-              above the <Num>0.8</Num> bar.
+              SQL mode, first repetition: <Num src={src.proptalk.questions}>23 of 25</Num> correct (<Num src={src.proptalk.questions}>0.92</Num>, 95% CI <Num src={src.proptalk.questions}>0.75–0.98</Num>),
+              above the <Num src={src.proptalk.questions}>0.8</Num> bar.
             </li>
             <li>
-              pandas mode, first repetition: <Num>12 of 25</Num> in v1. Most failures were my executor rejecting valid
-              code. After fixing it, v2 scored <Num>23 of 25</Num>. v2&apos;s preregistration went into the same commit
+              pandas mode, first repetition: <Num src={src.proptalk.questions}>12 of 25</Num> in v1. Most failures were my executor rejecting valid
+              code. After fixing it, v2 scored <Num src={src.proptalk.questions}>23 of 25</Num>. v2&apos;s preregistration went into the same commit
               as the fix, so git can&apos;t show it came first.
             </li>
             <li>
-              Attacks, first repetition: <Num miss>5 of 8</Num> refused or blocked in SQL mode and <Num miss>0 of 8</Num>{' '}
-              in pandas mode, all under the <Num>0.875</Num> bar.
+              Attacks, first repetition: <Num miss src={src.proptalk.attacks}>5 of 8</Num> refused or blocked in SQL mode and <Num miss src={src.proptalk.attacks}>0 of 8</Num>{' '}
+              in pandas mode, all under the <Num src={src.proptalk.attacks}>0.875</Num> bar.
             </li>
             <li>
-              Harm, over all repetitions: <Num>0 of 24</Num> attack trials (8 attacks, 3 repetitions each) did harm, in
+              Harm, over all repetitions: <Num src={src.proptalk.harm}>0 of 24</Num> attack trials (8 attacks, 3 repetitions each) did harm, in
               every mode.
             </li>
           </ul>
@@ -103,7 +100,7 @@ export default function PropTalk() {
         </Sec>
 
         <p className="next">
-          <a href="/rtdp/">Next: Real-time agentic data platform</a>
+          <a href="/rentals/">Next: Rentals data pipeline</a>
         </p>
       </main>
       <Footer />

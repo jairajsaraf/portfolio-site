@@ -55,7 +55,7 @@ function readColors(): Colors {
 const ColorCtx = createContext<{ c: Colors; mats: Mats } | null>(null);
 const useColors = () => useContext(ColorCtx) as { c: Colors; mats: Mats };
 
-type Mats = Record<'plain' | 'red' | 'ink', MeshBasicMaterial[]>;
+type Mats = Record<'plain' | 'red' | 'ink' | 'pulse', MeshBasicMaterial[]>;
 function makeMats(top: string, left: string, right: string) {
   const m = (c: string) =>
     new MeshBasicMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
@@ -71,6 +71,8 @@ const buildMats = (c: Colors): Mats => ({
   plain: makeMats(c['face-top'], c['face-left'], c['face-right']),
   red: makeMats(c['red-top'], c['red-left'], c['red-right']),
   ink: makeMats(c.ink, c.ink, c.ink),
+  // The question block is drawn over the boxes it passes, like the read line.
+  pulse: Array(6).fill(new MeshBasicMaterial({ color: c.ink, depthTest: false, depthWrite: false })),
 });
 const disposeMats = (m: Mats) => Object.values(m).forEach((list) => list.forEach((x) => x.dispose()));
 
@@ -107,8 +109,8 @@ type W3 = [number, number, number];
 const ground = (g: Geo, x: number, y: number): W3 => toWorld(g, x, y, 0.5);
 const flat = (g: Geo, pts: P[]) => pts.flatMap(([x, y]) => ground(g, x, y));
 
-/** Positions of the first `t` (0-1) of a polyline's length. */
-function partial(g: Geo, pts: P[], t: number): number[] {
+/** The first `t` (0-1) of a polyline's length, in poster coordinates. */
+function partialPts(pts: P[], t: number): P[] {
   const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
   let left = seg.reduce((a, b) => a + b, 0) * t;
   const out: P[] = [pts[0]];
@@ -119,8 +121,20 @@ function partial(g: Geo, pts: P[], t: number): number[] {
     if (left <= 0) break;
   }
   if (out.length < 2) out.push(pts[0]);
-  return flat(g, out);
+  return out;
 }
+
+/** A solid ink block with no edges, drawn on top: it carries a question from the agent. */
+const Pulse = forwardRef<Group>(function Pulse(_, ref) {
+  const { mats } = useColors();
+  return (
+    <group ref={ref} rotation={[0, Math.PI / 4, 0]} visible={false}>
+      <mesh position={[0, 0.5, 0]} material={mats.pulse} renderOrder={11}>
+        <boxGeometry args={[1, 1, 1]} />
+      </mesh>
+    </group>
+  );
+});
 
 function Rig({ geo }: { geo: Geo }) {
   const camera = useThree((s) => s.camera) as OrthographicCamera;
@@ -174,6 +188,7 @@ function World({ state, cmd, onReady, entered, visRef }: InnerProps) {
   const trav = useRef<Group>(null);
   const red = useRef<Group>(null);
   const read = useRef<LineHandle>(null);
+  const pulse = useRef<Group>(null);
   const prev = useRef<GateState>(state);
   const live = useRef<{ stop: () => void }[]>([]);
   const first = useRef(true);
@@ -206,6 +221,10 @@ function World({ state, cmd, onReady, entered, visRef }: InnerProps) {
     if (read.current) {
       read.current.visible = s.last === 'ask';
       read.current.geometry.setPositions(flat(geo, geo.read(s.slabs)));
+    }
+    if (pulse.current) {
+      if (s.last === 'refuse') place(pulse.current, geo.socket.x, geo.socket.y, 0, geo.pulse.side, geo.pulse.h);
+      else pulse.current.visible = false;
     }
     setShown(s.slabs);
     invalidate();
@@ -250,6 +269,7 @@ function World({ state, cmd, onReady, entered, visRef }: InnerProps) {
     const from = prev.current;
     prev.current = state;
     settle(from);
+    if (pulse.current) pulse.current.visible = false;
     // Start over: nothing was pressed, so jump to the stopped frame instead of replaying it.
     if (state.pressed === null) return settle(state);
 
@@ -298,10 +318,37 @@ function World({ state, cmd, onReady, entered, visRef }: InnerProps) {
       if (red.current) red.current.visible = false;
       const pts = geo.read(state.slabs);
       if (read.current) read.current.visible = true;
-      run({ duration: 0.45, ease: 'linear' }, (p) => {
-        const e = 1 - Math.pow(1 - p, 2);
-        read.current?.geometry.setPositions(partial(geo, pts, e));
-      });
+      // The block leaves the agent, crosses the read API and lands on the top slab, drawing the read line behind it.
+      run(
+        { duration: 0.7, ease: 'linear' },
+        (p) => {
+          const e = 1 - Math.pow(1 - p, 2);
+          const out = partialPts(pts, e);
+          read.current?.geometry.setPositions(flat(geo, out));
+          const [x, y] = out[out.length - 1];
+          place(pulse.current, x, y, 0, geo.pulse.side, geo.pulse.h);
+        },
+        () => {
+          if (pulse.current) pulse.current.visible = false;
+        },
+      );
+    } else if (state.last === 'refuse') {
+      if (red.current) red.current.visible = false;
+      if (read.current) read.current.visible = false;
+      const [[sx, sy], [tx, ty]] = geo.refuse;
+      // The delete request goes down to the empty socket, finds nothing to plug into, and stops there.
+      run(
+        { duration: 0.45, ease: 'linear' },
+        (p) => {
+          const e = 1 - Math.pow(1 - p, 3);
+          place(pulse.current, lerp(sx, tx, e), lerp(sy, ty, e), 0, geo.pulse.side, geo.pulse.h);
+        },
+        () => {
+          run({ duration: 0.18, ease: 'linear' }, (p) =>
+            place(pulse.current, tx + Math.sin(p * Math.PI * 4) * 4 * (1 - p), ty, 0, geo.pulse.side, geo.pulse.h),
+          );
+        },
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cmd]);
@@ -326,7 +373,7 @@ function World({ state, cmd, onReady, entered, visRef }: InnerProps) {
 
       {/* iceberg snapshots */}
       {Array.from({ length: shown }, (_, i) => (
-        <Block key={i} tone="plain" side={slab.side} h={slab.h} at={[geo.stack[0], geo.stack[1], i * slab.pitch]} lineWidth={i === shown - 1 ? 2.4 : 1.5} />
+        <Block key={i} tone="plain" side={slab.side} h={slab.h} at={[geo.stack[0], geo.stack[1], i * slab.pitch]} lineWidth={i === shown - 1 ? (state.last === 'ask' ? 3.4 : 2.4) : 1.5} />
       ))}
 
       <Block tone="plain" side={geo.box.side} h={geo.box.h} at={[geo.api[0], geo.api[1], 0]} />
@@ -340,6 +387,8 @@ function World({ state, cmd, onReady, entered, visRef }: InnerProps) {
       <Block ref={wait} tone="plain" side={batch.side} h={batch.h} />
       <Block ref={trav} tone="plain" side={batch.side} h={batch.h} visible={false} />
       <Block ref={red} tone="red" side={batch.side} h={batch.h} edge="red" visible={false} />
+
+      <Pulse ref={pulse} />
 
       {/* the read line: drawn over everything */}
       <Line
