@@ -92,7 +92,18 @@ function Proj({ name, small, href }: { name: string; small: string; href?: strin
   );
 }
 
-export type RowId = 'rtdp' | 'sql' | 'attack' | 'rentals';
+/** O2: one square per case, filled = passed. Decoration: the sentence beside it states the count. */
+function Cases({ pass, of }: { pass: number; of: number }) {
+  return (
+    <svg className="cases" width={of * 10 - 2} height="8" aria-hidden="true" focusable="false" shapeRendering="crispEdges">
+      {Array.from({ length: of }, (_, i) => (
+        <rect key={i} className={i < pass ? 'pass' : undefined} data-case={i < pass ? '' : undefined} x={i * 10 + 0.5} y="0.5" width="7" height="7" />
+      ))}
+    </svg>
+  );
+}
+
+export type RowId ='rtdp' | 'sql' | 'attack' | 'rentals';
 
 type RowProps = {
   id: RowId;
@@ -142,6 +153,7 @@ export function SheetRow({ id, first, link = true }: RowProps) {
         <Axis ci={[35, 88]} dot={66.7} bar={75} first={first} />
         {first && <TickRow className="first-ticks" />}
         <div className="say">
+          <Cases pass={6} of={9} />
           <b>Agent eval:</b> <Num miss src={src.rtdp.run3}>6 of 9</Num> tasks passed (95% CI <Num src={src.rtdp.run3}>0.35–0.88</Num>), short of the{' '}
           <Num src={src.rtdp.bar}>0.75</Num> bar I set before the first run.
         </div>
@@ -155,6 +167,7 @@ export function SheetRow({ id, first, link = true }: RowProps) {
         <Axis ci={[75, 98]} dot={92} bar={80} first={first} ciEnd />
         {first && <TickRow className="first-ticks" />}
         <div className="say">
+          <Cases pass={23} of={25} />
           <b>Eval, SQL mode:</b> <Num src={src.proptalk.questions}>23 of 25</Num> questions correct (95% CI <Num src={src.proptalk.questions}>0.75–0.98</Num>), above the{' '}
           <Num src={src.proptalk.questions}>0.8</Num> bar.
         </div>
@@ -167,6 +180,7 @@ export function SheetRow({ id, first, link = true }: RowProps) {
       <Axis ci={[31, 86]} dot={62.5} bar={87.5} first={first} />
       {first && <TickRow className="first-ticks" />}
       <div className="say">
+        <Cases pass={5} of={8} />
         <b>Attacks, SQL mode:</b> <Num miss src={src.proptalk.attacks}>5 of 8</Num> refused or blocked, under the <Num src={src.proptalk.attacks}>0.875</Num> bar. pandas mode:{' '}
         <Num src={src.proptalk.attacks}>0 of 8</Num>. No attack did any harm.
       </div>
@@ -204,6 +218,12 @@ function useDraw(ref: RefObject<HTMLElement | null>) {
     });
     q<SVGElement>('[data-dot]').forEach((el, i) => {
       animate(el, { opacity: [0, 1], scale: [0.5, 1] }, { duration: 0.2, ease: 'easeOut', delay: i * 0.08 + 0.3 });
+    });
+    // O2: passed squares fill left to right, 40 ms apart, starting with their row's CI line.
+    q<SVGElement>('.cases').forEach((strip, i) => {
+      strip.querySelectorAll<SVGElement>('[data-case]').forEach((el, j) => {
+        animate(el, { fillOpacity: [0, 1] }, { duration: 0.1, delay: i * 0.08 + j * 0.04 });
+      });
     });
 
     // Rentals parity: both bars grow at the same rate to the same length, then a thin bracket joins their right ends.
