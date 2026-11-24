@@ -117,7 +117,7 @@ button:focus-visible {
   display: none;
   position: absolute;
   left: 0;
-  top: calc(100% + 2px);
+  bottom: calc(100% + 2px); /* above the figure: it never covers the next line (owner, 2026-11-23) */
   z-index: 2;
   padding: 1px 4px;
   border: 1px solid var(--grid);
@@ -136,7 +136,6 @@ button:focus-visible {
 @media (max-width: 760px) {
   .src-path {
     position: fixed;
-    top: auto;
     left: 8px;
     bottom: 8px;
   }
