@@ -182,7 +182,7 @@ export function SheetRow({ id, first, link = true }: RowProps) {
       <div className="say">
         <Cases pass={5} of={8} />
         <b>Attacks, SQL mode:</b> <Num miss src={src.proptalk.attacks}>5 of 8</Num> refused or blocked, under the <Num src={src.proptalk.attacks}>0.875</Num> bar. pandas mode:{' '}
-        <Num src={src.proptalk.attacks}>0 of 8</Num>. No attack did any harm.
+        <Num miss src={src.proptalk.attacks}>0 of 8</Num>. No attack did any harm.
       </div>
     </div>
   );
