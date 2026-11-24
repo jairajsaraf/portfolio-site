@@ -128,6 +128,15 @@ button:focus-visible {
   word-spacing: normal;
   white-space: nowrap;
 }
+/* Invisible bridge over the 2px gap, so the pointer can move onto the box without losing the hover (WCAG 1.4.13 hoverable). */
+.src-path::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 4px;
+}
 .num.src:hover .src-path,
 .num.src:focus-visible .src-path {
   display: block;
